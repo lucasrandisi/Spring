@@ -1,0 +1,30 @@
+name: market_test
+services:
+  api-test:
+    container_name: api-test
+    image: eclipse-temurin:23
+    depends_on:
+      - db-test
+    networks:
+      - market_test
+
+  db-test:
+    container_name: db-test
+    image: postgres:16.4
+    ports:
+      - "${DB_PORT}:5432"
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - market_db_test:/var/lib/postgresql/data
+    networks:
+      - market_test
+
+volumes:
+  market_db_test:
+
+networks:
+  market_test:
+    driver: bridge

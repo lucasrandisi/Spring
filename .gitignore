@@ -1,0 +1,10 @@
+### Root ###
+.env
+
+### Api ###
+api/target/
+api/logs/
+api/src/main/resources/application.properties
+
+### IntelliJ IDEA ###
+.idea/

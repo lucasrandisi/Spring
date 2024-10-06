@@ -1,0 +1,34 @@
+name: market
+services:
+  api:
+    container_name: api
+    image: eclipse-temurin:23
+    ports:
+      - "${API_PORT}:8080"
+    volumes:
+      - ./api:/app
+    depends_on:
+      - db
+    networks:
+      - market
+
+  db:
+    container_name: db
+    image: postgres:16.4
+    ports:
+      - "${DB_PORT}:5432"
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - market_db:/var/lib/postgresql/data
+    networks:
+      - market
+
+volumes:
+  market_db:
+
+networks:
+  market:
+    driver: bridge
