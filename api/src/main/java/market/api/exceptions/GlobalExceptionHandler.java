@@ -1,6 +1,7 @@
 package market.api.exceptions;
 
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,7 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
 	}
 
-	@ExceptionHandler({BadCredentialsException.class, ExpiredJwtException.class, SignatureException.class})
+	@ExceptionHandler({BadCredentialsException.class, ExpiredJwtException.class, SignatureException.class, MalformedJwtException.class})
 	public ResponseEntity<Map<String, String>> handleUnauthorizedException(Exception ex) {
 		Map<String, String> errorResponse = new HashMap<>();
 		errorResponse.put("error", "Unauthorized");

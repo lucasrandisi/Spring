@@ -6,10 +6,7 @@ import market.api.dtos.auth.RegisterRequestDTO;
 import market.api.services.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController()
 @RequestMapping("/auth")
@@ -32,5 +29,13 @@ public class AuthController {
 		LoginResponseDTO loginResponseDto = authService.login(loginRequestDTO);
 
 		return ResponseEntity.ok(loginResponseDto);
+	}
+
+	@PostMapping("/logout")
+	public ResponseEntity<Void> logout(@RequestHeader("Authorization") String jwt) {
+		jwt = jwt.substring(7);
+
+		authService.logout(jwt);
+		return ResponseEntity.noContent().build();
 	}
 }

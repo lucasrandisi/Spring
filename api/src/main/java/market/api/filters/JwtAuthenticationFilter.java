@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import market.api.repositories.BlacklistedTokenRepository;
 import market.api.utils.JwtUtil;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,12 +25,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private final JwtUtil jwtUtil;
 	private final UserDetailsService userDetailsService;
 	private final HandlerExceptionResolver handlerExceptionResolver;
+	private final BlacklistedTokenRepository blacklistedTokenRepository;
 
 
-	public JwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService, HandlerExceptionResolver handlerExceptionResolver) {
+	public JwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService, HandlerExceptionResolver handlerExceptionResolver, BlacklistedTokenRepository blacklistedTokenRepository) {
 		this.jwtUtil = jwtUtil;
 		this.userDetailsService = userDetailsService;
 		this.handlerExceptionResolver = handlerExceptionResolver;
+		this.blacklistedTokenRepository = blacklistedTokenRepository;
 	}
 
 	@Override
@@ -47,6 +50,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
 			if (authentication == null && jwtUtil.isTokenValid(jwt)) {
+				// Check if the token has not been blacklisted
+				if (blacklistedTokenRepository.existsByToken(jwt)) {
+					filterChain.doFilter(request, response);
+					return;
+				}
+
 				final String userEmail = jwtUtil.extractUsername(jwt);
 				UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 

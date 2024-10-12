@@ -35,6 +35,10 @@ public class JwtUtil {
 		return extractClaim(token, Claims::getSubject);
 	}
 
+	public Date extractExpiration(String token) {
+		return extractClaim(token, Claims::getExpiration);
+	}
+
 	public long getExpirationTime() {
 		return jwtExpiration;
 	}
@@ -55,17 +59,14 @@ public class JwtUtil {
 	}
 
 	private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-		final Claims claims = extractAllClaims(token);
-		return claimsResolver.apply(claims);
-	}
-
-	private Claims extractAllClaims(String token) {
-		return Jwts
+		Claims claims = Jwts
 			.parserBuilder()
 			.setSigningKey(getSignInKey())
 			.build()
 			.parseClaimsJws(token)
 			.getBody();
+
+		return claimsResolver.apply(claims);
 	}
 
 	private Key getSignInKey() {
