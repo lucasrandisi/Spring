@@ -1,4 +1,4 @@
-package market.api.security;
+package market.api.services;
 
 import market.api.repositories.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;

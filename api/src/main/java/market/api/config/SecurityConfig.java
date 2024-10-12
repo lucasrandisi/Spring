@@ -1,4 +1,4 @@
-	package market.api.security;
+	package market.api.config;
 
 	import market.api.filters.JwtAuthenticationFilter;
 	import org.springframework.context.annotation.Bean;
