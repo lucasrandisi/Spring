@@ -3,6 +3,7 @@ package market.api.integration.auth;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import market.api.dtos.auth.LoginRequestDTO;
 import market.api.dtos.auth.LoginResponseDTO;
+import market.api.factories.UserFactory;
 import market.api.models.User;
 import market.api.repositories.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -11,16 +12,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -28,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional
 @ActiveProfiles("test")
-public class LoginTest {
+public class LoginIntegrationTest {
 	@Autowired
 	private MockMvc mockMvc;
 
@@ -38,25 +37,20 @@ public class LoginTest {
 	@Autowired
 	private UserRepository userRepository;
 
-	@Autowired
-	private PasswordEncoder passwordEncoder;
-
 	@Value("${security.jwt.expiration-time}")
 	private long jwtExpiration;
+	@Autowired
+	private UserFactory userFactory;
 
 	@Test
 	public void testSuccessfulLogin() throws Exception {
 		String email = "test@example.com";
 		String password = "password123";
-		String firstName = "John";
-		String lastName = "Doe";
 
-		User user = new User();
-		user.setEmail(email);
-		user.setPassword(passwordEncoder.encode(password));
-		user.setFirstName(firstName);
-		user.setLastName(lastName);
-		user.setCreatedAt(LocalDateTime.now());
+		User user = userFactory.builder()
+			.email(email)
+			.password(password)
+			.build();
 
 		userRepository.save(user);
 
@@ -75,8 +69,14 @@ public class LoginTest {
 
 		assertNotNull(loginResponseDTO.getToken());
 		assertEquals(loginResponseDTO.getExpiresIn(), jwtExpiration);
-		assertEquals(email, loginResponseDTO.getUser().getEmail());
-		assertEquals(firstName, loginResponseDTO.getUser().getFirstName());
-		assertEquals(lastName, loginResponseDTO.getUser().getLastName());
+		assertEquals(user.getEmail(), loginResponseDTO.getUser().getEmail());
+		assertEquals(user.getFirstName(), loginResponseDTO.getUser().getFirstName());
+		assertEquals(user.getLastName(), loginResponseDTO.getUser().getLastName());
+
+		mockMvc.perform(get("/test/protected")
+				.header("Authorization", "Bearer " + loginResponseDTO.getToken())
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andReturn();
 	}
 }
