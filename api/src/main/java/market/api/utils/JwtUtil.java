@@ -10,6 +10,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,8 +37,9 @@ public class JwtUtil {
 		return extractClaim(token, Claims::getSubject);
 	}
 
-	public Date extractExpiration(String token) {
-		return extractClaim(token, Claims::getExpiration);
+	public LocalDateTime extractExpiration(String token) {
+		Date expirationDate = extractClaim(token, Claims::getExpiration);
+		return LocalDateTime.ofInstant(expirationDate.toInstant(), ZoneId.systemDefault());
 	}
 
 	public long getExpirationTime() {

@@ -4,7 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import market.api.repositories.BlacklistedTokenRepository;
+import market.api.repositories.BlackListedTokenRepository;
 import market.api.utils.JwtUtil;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,10 +25,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private final JwtUtil jwtUtil;
 	private final UserDetailsService userDetailsService;
 	private final HandlerExceptionResolver handlerExceptionResolver;
-	private final BlacklistedTokenRepository blacklistedTokenRepository;
+	private final BlackListedTokenRepository blacklistedTokenRepository;
 
 
-	public JwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService, HandlerExceptionResolver handlerExceptionResolver, BlacklistedTokenRepository blacklistedTokenRepository) {
+	public JwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService, HandlerExceptionResolver handlerExceptionResolver, BlackListedTokenRepository blacklistedTokenRepository) {
 		this.jwtUtil = jwtUtil;
 		this.userDetailsService = userDetailsService;
 		this.handlerExceptionResolver = handlerExceptionResolver;

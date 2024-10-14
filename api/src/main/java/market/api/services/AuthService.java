@@ -1,13 +1,13 @@
 package market.api.services;
 
+import market.api.dtos.UserDTO;
 import market.api.dtos.auth.LoginRequestDTO;
 import market.api.dtos.auth.LoginResponseDTO;
 import market.api.dtos.auth.RegisterRequestDTO;
-import market.api.dtos.UserDTO;
 import market.api.exceptions.ConflictException;
-import market.api.models.BlacklistedToken;
+import market.api.models.BlackListedToken;
 import market.api.models.User;
-import market.api.repositories.BlacklistedTokenRepository;
+import market.api.repositories.BlackListedTokenRepository;
 import market.api.repositories.UserRepository;
 import market.api.utils.JwtUtil;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,7 +19,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Service
 public class AuthService {
@@ -27,14 +26,14 @@ public class AuthService {
 	private final AuthenticationManager authenticationManager;
 	private final JwtUtil jwtUtil;
 	private final PasswordEncoder passwordEncoder;
-	private final BlacklistedTokenRepository blacklistedTokenRepository;
+	private final BlackListedTokenRepository blackListedTokenRepository;
 
-	public AuthService(UserRepository userRepository, AuthenticationManager authenticationManager, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, BlacklistedTokenRepository blacklistedTokenRepository) {
+	public AuthService(UserRepository userRepository, AuthenticationManager authenticationManager, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, BlackListedTokenRepository blackListedTokenRepository) {
 		this.userRepository = userRepository;
 		this.authenticationManager = authenticationManager;
 		this.jwtUtil = jwtUtil;
 		this.passwordEncoder = passwordEncoder;
-		this.blacklistedTokenRepository = blacklistedTokenRepository;
+		this.blackListedTokenRepository = blackListedTokenRepository;
 	}
 
 	public LoginResponseDTO register(RegisterRequestDTO registerRequestDTO) {
@@ -88,12 +87,12 @@ public class AuthService {
 	}
 
 	public void logout(String jwt) {
-		Date expiration = jwtUtil.extractExpiration(jwt);
+		LocalDateTime expiration = jwtUtil.extractExpiration(jwt);
 
-		BlacklistedToken blacklistedToken = new BlacklistedToken();
+		BlackListedToken blacklistedToken = new BlackListedToken();
 		blacklistedToken.setToken(jwt);
 		blacklistedToken.setExpireDate(expiration);
 
-		blacklistedTokenRepository.save(blacklistedToken);
+		blackListedTokenRepository.save(blacklistedToken);
 	}
 }
