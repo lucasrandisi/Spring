@@ -27,16 +27,15 @@ import static org.mockito.Mockito.when;
 public class AuthServiceTest {
 	@Mock
 	AuthenticationManager authenticationManager;
-
+	@InjectMocks
+	AuthService authService;
 	@Mock
 	private UserRepository userRepository;
 
-	@InjectMocks
-	AuthService authService;
-
 	@Test
-	public void login_throwsExceptionWhenUsingWrongCredentials() {
-		when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenThrow(new AuthenticationException("Authentication failed") {});
+	public void loginThrowsExceptionWhenUsingWrongCredentials() {
+		when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenThrow(new AuthenticationException("Authentication failed") {
+		});
 
 		LoginRequestDTO loginRequestDTO = new LoginRequestDTO();
 		loginRequestDTO.setEmail("email@test.com");
@@ -47,8 +46,8 @@ public class AuthServiceTest {
 	}
 
 	@Test
-	void register_throwsConflictExceptionOnAlreadyExistingEmail() {
-		RegisterRequestDTO registerRequestDTO= new RegisterRequestDTO();
+	void registerThrowsConflictExceptionOnAlreadyExistingEmail() {
+		RegisterRequestDTO registerRequestDTO = new RegisterRequestDTO();
 		registerRequestDTO.setEmail("email@email.com");
 		registerRequestDTO.setPassword("password");
 		registerRequestDTO.setFirstName("firstName");
