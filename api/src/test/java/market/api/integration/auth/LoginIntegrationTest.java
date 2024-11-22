@@ -1,8 +1,11 @@
 package market.api.integration.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import market.api.dtos.RoleDTO;
+import market.api.dtos.UserDTO;
 import market.api.dtos.auth.LoginRequestDTO;
 import market.api.dtos.auth.LoginResponseDTO;
+import market.api.enums.RoleEnum;
 import market.api.factories.UserFactory;
 import market.api.models.User;
 import market.api.repositories.UserRepository;
@@ -67,11 +70,20 @@ public class LoginIntegrationTest {
 		String content = loginResult.getResponse().getContentAsString();
 		LoginResponseDTO loginResponseDTO = objectMapper.readValue(content, LoginResponseDTO.class);
 
+		// Token assertions
 		assertNotNull(loginResponseDTO.getToken());
 		assertEquals(loginResponseDTO.getExpiresIn(), jwtExpiration);
-		assertEquals(user.getEmail(), loginResponseDTO.getUser().getEmail());
-		assertEquals(user.getFirstName(), loginResponseDTO.getUser().getFirstName());
-		assertEquals(user.getLastName(), loginResponseDTO.getUser().getLastName());
+
+		// User assertions
+		UserDTO userDto = loginResponseDTO.getUser();
+		assertEquals(user.getEmail(), userDto.getEmail());
+		assertEquals(user.getFirstName(), userDto.getFirstName());
+		assertEquals(user.getLastName(), userDto.getLastName());
+
+		// Role assertions
+		RoleDTO roleDTO = userDto.getRoles().stream().findFirst().orElseThrow(() -> new AssertionError("Role not found"));
+		assertEquals(RoleEnum.USER.getId(), roleDTO.getId());
+		assertEquals(RoleEnum.USER.getName(), roleDTO.getName());
 
 		mockMvc.perform(get("/test/protected")
 				.header("Authorization", "Bearer " + loginResponseDTO.getToken())

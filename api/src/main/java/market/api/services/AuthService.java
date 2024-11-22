@@ -4,10 +4,13 @@ import market.api.dtos.UserDTO;
 import market.api.dtos.auth.LoginRequestDTO;
 import market.api.dtos.auth.LoginResponseDTO;
 import market.api.dtos.auth.RegisterRequestDTO;
+import market.api.enums.RoleEnum;
 import market.api.exceptions.ConflictException;
 import market.api.models.BlackListedToken;
+import market.api.models.Role;
 import market.api.models.User;
 import market.api.repositories.BlackListedTokenRepository;
+import market.api.repositories.RoleRepository;
 import market.api.repositories.UserRepository;
 import market.api.utils.JwtUtil;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,13 +26,15 @@ import java.time.LocalDateTime;
 @Service
 public class AuthService {
 	private final UserRepository userRepository;
+	private final RoleRepository roleRepository;
 	private final AuthenticationManager authenticationManager;
 	private final JwtUtil jwtUtil;
 	private final PasswordEncoder passwordEncoder;
 	private final BlackListedTokenRepository blackListedTokenRepository;
 
-	public AuthService(UserRepository userRepository, AuthenticationManager authenticationManager, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, BlackListedTokenRepository blackListedTokenRepository) {
+	public AuthService(UserRepository userRepository, RoleRepository roleRepository, AuthenticationManager authenticationManager, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, BlackListedTokenRepository blackListedTokenRepository) {
 		this.userRepository = userRepository;
+		this.roleRepository = roleRepository;
 		this.authenticationManager = authenticationManager;
 		this.jwtUtil = jwtUtil;
 		this.passwordEncoder = passwordEncoder;
@@ -47,6 +52,10 @@ public class AuthService {
 		user.setFirstName(registerRequestDTO.getFirstName());
 		user.setLastName(registerRequestDTO.getLastName());
 		user.setCreatedAt(LocalDateTime.now());
+
+		Role role = roleRepository.findById(RoleEnum.USER.getId()).orElseThrow();
+
+		user.getRoles().add(role);
 
 		userRepository.save(user);
 
@@ -73,10 +82,7 @@ public class AuthService {
 	}
 
 	private LoginResponseDTO buildLoginResponseDTO(User user, String jwt) {
-		UserDTO userDTO = new UserDTO();
-		userDTO.setEmail(user.getEmail());
-		userDTO.setFirstName(user.getFirstName());
-		userDTO.setLastName(user.getLastName());
+		UserDTO userDTO = new UserDTO(user);
 
 		LoginResponseDTO loginResponseDTO = new LoginResponseDTO();
 		loginResponseDTO.setUser(userDTO);

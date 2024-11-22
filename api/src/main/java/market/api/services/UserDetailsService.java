@@ -3,9 +3,9 @@ package market.api.services;
 import market.api.repositories.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 public class UserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService {
 	private final UserRepository userRepository;
 
@@ -14,8 +14,8 @@ public class UserDetailsService implements org.springframework.security.core.use
 	}
 
 	@Override
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		return userRepository.findByEmail(username)
+	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+		return userRepository.findWithRolesByEmail(email)
 			.orElseThrow(() -> new UsernameNotFoundException("User not found"));
 	}
 }

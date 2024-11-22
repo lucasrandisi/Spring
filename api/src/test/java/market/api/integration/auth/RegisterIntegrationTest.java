@@ -2,8 +2,11 @@ package market.api.integration.auth;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import market.api.dtos.RoleDTO;
+import market.api.dtos.UserDTO;
 import market.api.dtos.auth.LoginResponseDTO;
 import market.api.dtos.auth.RegisterRequestDTO;
+import market.api.enums.RoleEnum;
 import market.api.repositories.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,12 +63,22 @@ public class RegisterIntegrationTest {
 		String content = registrationResult.getResponse().getContentAsString();
 		LoginResponseDTO loginResponseDTO = objectMapper.readValue(content, LoginResponseDTO.class);
 
+		// Token assertions
 		assertNotNull(loginResponseDTO.getToken());
 		assertEquals(loginResponseDTO.getExpiresIn(), jwtExpiration);
-		assertEquals(email, loginResponseDTO.getUser().getEmail());
-		assertEquals(firstName, loginResponseDTO.getUser().getFirstName());
-		assertEquals(lastName, loginResponseDTO.getUser().getLastName());
 
+		// User assertions
+		UserDTO userDto = loginResponseDTO.getUser();
+		assertEquals(email, userDto.getEmail());
+		assertEquals(firstName, userDto.getFirstName());
+		assertEquals(lastName, userDto.getLastName());
+
+		// Role assertions
+		RoleDTO roleDTO = userDto.getRoles().stream().findFirst().orElseThrow(() -> new AssertionError("Role not found"));
+		assertEquals(RoleEnum.USER.getId(), roleDTO.getId());
+		assertEquals(RoleEnum.USER.getName(), roleDTO.getName());
+
+		// Database
 		assertTrue(userRepository.findByEmail(email).isPresent());
 
 		mockMvc.perform(get("/test/protected")

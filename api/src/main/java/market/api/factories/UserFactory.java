@@ -1,19 +1,22 @@
 package market.api.factories;
 
-import com.github.javafaker.Faker;
+import market.api.models.Role;
 import market.api.models.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.Set;
+
 
 @Component
-public class UserFactory {
-	private final Faker faker;
+public class UserFactory extends Factory {
 	private final PasswordEncoder passwordEncoder;
+	private final RoleFactory roleFactory;
 
-	public UserFactory(PasswordEncoder passwordEncoder) {
+	public UserFactory(PasswordEncoder passwordEncoder, RoleFactory roleFactory) {
+		super();
 		this.passwordEncoder = passwordEncoder;
-		this.faker = new Faker();
+		this.roleFactory = roleFactory;
 	}
 
 	public UserBuilder builder() {
@@ -52,6 +55,10 @@ public class UserFactory {
 			user.setLastName(lastName != null ? lastName : faker.name().lastName());
 			user.setEmail(email != null ? email : faker.internet().emailAddress());
 			user.setPassword(password != null ? passwordEncoder.encode(password) : passwordEncoder.encode(faker.internet().password()));
+
+			Role role = roleFactory.builder().build();
+			user.setRoles(Set.of(role));
+
 			return user;
 		}
 	}
